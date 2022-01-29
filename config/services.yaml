@@ -20,5 +20,17 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    Symfony\Component\Serializer\Normalizer\ConstraintViolationListNormalizer:
+        tags:
+            - serializer.normalizer
+
+    Symfony\Component\Serializer\Normalizer\DateTimeNormalizer:
+        tags:
+            - serializer.normalizer
+
+    Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer:
+        tags:
+            - serializer.normalizer
+
+    app.encryptor:
+        class: App\Service\Encryptor
