@@ -4,10 +4,12 @@ RUN apk add --update --no-cache \
     make \
     curl \
     nano \
+    git \
     ca-certificates \
     coreutils \
     gettext \
     php8-fpm \
+    php8-posix \
     php8-ctype \
     php8-curl \
     php8-dom \
@@ -67,7 +69,7 @@ ARG SYMFONY_CLI_VERSION
 RUN wget https://github.com/symfony/cli/releases/download/v$SYMFONY_CLI_VERSION/symfony_linux_amd64.gz; \
     gzip -d symfony_linux_amd64.gz; \
     chmod +x symfony_linux_amd64; \
-    mv symfony_linux_amd64 /usr/local/bin/
+    mv symfony_linux_amd64 /usr/local/bin/symfony
 
 RUN set -x; \
     addgroup -g 82 -S www-data; \

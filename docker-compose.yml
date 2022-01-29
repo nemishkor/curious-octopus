@@ -20,7 +20,7 @@ services:
                 PHP_XDEBUG_MODE: off
                 PHP_XDEBUG_CLIENT_PORT: 9001
                 PHP_XDEBUG_CLIENT_HOST: host.docker.internal
-                SYMFONY_CLI_VERSION: 4.23.2
+                SYMFONY_CLI_VERSION: 4.28.1
         ports:
             - "8091:80"
             - "9001:9001"
