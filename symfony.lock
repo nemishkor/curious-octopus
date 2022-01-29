@@ -158,6 +158,9 @@
     "phpdocumentor/type-resolver": {
         "version": "1.6.0"
     },
+    "phpmyadmin/sql-parser": {
+        "version": "5.5.0"
+    },
     "phpspec/prophecy": {
         "version": "v1.15.0"
     },
