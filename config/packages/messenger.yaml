@@ -18,6 +18,7 @@ framework:
             Symfony\Component\Notifier\Message\SmsMessage: async
             App\Messages\DispatchQueryMessage: async
             App\Messages\ProcessJobMessage: async
+            App\Messages\CompileQueryResultsMessage: async
 
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
