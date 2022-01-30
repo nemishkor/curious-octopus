@@ -24,4 +24,8 @@ class JobResultsStorage {
         );
     }
 
+    public function getFilename(Query $query): string {
+        return sprintf('%s/%s.json', $this->resultsDir, $query->getId());
+    }
+
 }

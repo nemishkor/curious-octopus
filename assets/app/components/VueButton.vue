@@ -1,7 +1,7 @@
 <template>
   <button :class="{
-    'text-white bg-indigo-600 hover:bg-indigo-100 hover:text-indigo-700': type === 'default',
-    'border-red-800 hover:text-red-600 bg-red-600 hover:bg-white text-white': type === 'danger',
+    'text-white bg-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-300': type === 'default',
+    'border-red-800 hover:text-red-600 bg-red-600 hover:bg-white text-white transition-colors duration-300': type === 'danger',
     'px-1 py-0.5': size === 'small',
     'py-2 px-2': size === 'default'
           }"

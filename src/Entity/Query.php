@@ -11,6 +11,7 @@ use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\NotNull;
 
 #[ORM\Entity(repositoryClass: QueryRepository::class)]
@@ -19,23 +20,29 @@ class Query {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups('query')]
     private $id;
 
     #[ORM\Column(type: 'datetime')]
+    #[Groups('query')]
     private DateTimeInterface $created;
 
     #[ORM\Column(type: 'text')]
     #[NotNull]
     #[QueryString]
+    #[Groups('query')]
     private ?string $string;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups('query')]
     private string $state;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups('query')]
     private ?int $progressTotal = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups('query')]
     private ?int $progressCurrent = null;
 
     #[ORM\OneToMany(mappedBy: 'query', targetEntity: Job::class, orphanRemoval: true)]
