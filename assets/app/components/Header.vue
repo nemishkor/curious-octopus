@@ -9,11 +9,8 @@
       </div>
 
       <div class="flex flex-row ml-auto">
-        <div v-if="isAuthorized">
-          Hello<br>{{ user.email }}<br>
-          <VueButton :onClick="logout" label="Logout"/>
-        </div>
-        <VueButton :onClick="login" label="Login"/>
+        <div v-if="isAuthorized" class="py-2 px-4">{{ user.email }}</div>
+        <VueButton v-if="isAuthorized" :onClick="logout" label="Logout"/>
       </div>
     </div>
   </nav>

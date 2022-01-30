@@ -77,7 +77,9 @@ RUN set -x; \
     adduser -u 82 -D -S -G www-data www-data; \
     addgroup -g 1000 -S user; \
     adduser -u 1000 -D -S -s /bin/bash -G user user; \
-    adduser www-data user
+    adduser www-data user; \
+    mkdir -p /root/.config/yarn; \
+    chmod -R 777 /root
 
 COPY symfony.ini /etc/php8/conf.d/
 COPY symfony.ini /etc/php8/cli/conf.d/

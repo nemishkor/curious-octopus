@@ -28,8 +28,12 @@ class WatchQueriesCommand extends Command {
             $output->writeln('The command is already running in another process.');
             return Command::INVALID;
         }
-        $this->queryService->checkQueriesInScrappingStatus();
-        sleep(3);
+        $attempt = 1;
+        while ($attempt < 20) {
+            $this->queryService->checkQueriesInScrappingStatus();
+            sleep(3);
+            $attempt++;
+        }
 
         return Command::SUCCESS;
     }

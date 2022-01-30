@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const Dotenv = require('dotenv-webpack')
 let {VueLoaderPlugin} = require('vue-loader');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
@@ -28,6 +29,7 @@ Encore
 
     .enableVueLoader()
     .addPlugin(new VueLoaderPlugin())
+    .addPlugin(new Dotenv({systemvars: true, ignoreStub: true}))
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
