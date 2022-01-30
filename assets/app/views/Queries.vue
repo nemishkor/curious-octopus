@@ -33,7 +33,7 @@
       <tr v-for="query in items" :key="query.id" class="border-t border-gray-200">
         <td class="py-2.5 text-center">{{ query.id }}</td>
         <td class="py-2.5 px-0.5 text-center">{{ query.state }}</td>
-        <td class="py-2.5 px-0.5">{{ query.string.substr(0, 25) }}...</td>
+        <td class="py-2.5 px-0.5">{{ query.string.substr(0, 50) }}...</td>
         <td class="py-2.5 px-0.5 text-center">{{ query.created.substr(0, 16).replace('T', ' ') }}</td>
         <td class="py-2.5 px-0.5 text-center">
           <span v-if="Number(query.progress_total) !== 0">{{
