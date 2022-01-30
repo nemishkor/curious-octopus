@@ -34,7 +34,8 @@
         <td class="py-2.5 px-0.5 text-center">{{ database.user }}</td>
         <td class="py-2.5 px-0.5 text-center">{{ database.name }}</td>
         <td class="text-center">
-          <VueButton :onClick="function(){ delete(database.id) }" label="Delete" size="small" type="danger"/>
+          <VueButton :onClick="function(){ edit(database.id) }" label="Edit" size="small"/>
+          <VueButton :onClick="function(){ deleteDatabase(database.id) }" label="Delete" size="small" type="danger"/>
         </td>
       </tr>
       </tbody>
@@ -58,7 +59,7 @@ import VueButton from "../components/VueButton"
 import Alert from "../components/Alert";
 
 export default {
-  name: "Queries",
+  name: "Databases",
   components: {Alert, VueHeader, VueButton, SomethingWentWrongMessage, Loader},
   data: function () {
     return {
@@ -146,13 +147,16 @@ export default {
       }
       this.$router.push({name: 'databases', params: {page: Number(this.$route.params.page) + 1}})
     },
+    edit(id) {
+      this.$router.push({name: 'database', params: {id: id}})
+    },
     deleteDatabase(id) {
       this.error = false
       this.loading = true
       this.errorMessage = ''
       fetch(
           `${process.env.API_URL}api/databases/${id}`,
-          {method: 'GET', headers: {'X-API-TOKEN': this.$store.getters.token}}
+          {method: 'DELETE', headers: {'X-API-TOKEN': this.$store.getters.token}}
       ).then(
           (response) => {
             this.loading = false
