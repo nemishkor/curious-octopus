@@ -6,7 +6,18 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-import './styles/app.css';
+import Vue from "vue"
+import App from "./app/App.vue"
+import router from './app/router'
+import store from './app/store'
+import './app.css';
 
-// start the Stimulus application
-import './bootstrap';
+new Vue({
+    el: '#app',
+    router,
+    store,
+    render: h => h(App),
+    beforeCreate() {
+        this.$store.commit('initialiseStore');
+    }
+});
