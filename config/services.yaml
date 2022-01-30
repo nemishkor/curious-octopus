@@ -34,3 +34,7 @@ services:
 
     app.encryptor:
         class: App\Service\Encryptor
+
+    App\Service\JobResultsStorage:
+        arguments:
+            $resultsDir: '%kernel.project_dir%/var/job-results'

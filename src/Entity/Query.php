@@ -8,6 +8,8 @@ use App\Validator\QueryString;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints\NotNull;
 
@@ -36,10 +38,14 @@ class Query {
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $progressCurrent = null;
 
+    #[ORM\OneToMany(mappedBy: 'query', targetEntity: Job::class, orphanRemoval: true)]
+    private $jobs;
+
     public function __construct() {
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->created = new DateTime('now', new DateTimeZone('UTC'));
         $this->state = QueryState::IN_QUEUE;
+        $this->jobs = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -92,6 +98,36 @@ class Query {
 
     public function setProgressCurrent(?int $progressCurrent): self {
         $this->progressCurrent = $progressCurrent;
+        if ($this->progressCurrent >= $this->progressTotal) {
+            $this->setState(QueryState::COMPILING);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Job[]
+     */
+    public function getJobs(): Collection {
+        return $this->jobs;
+    }
+
+    public function addJob(Job $job): self {
+        if (!$this->jobs->contains($job)) {
+            $this->jobs[] = $job;
+            $job->setQuery($this);
+        }
+
+        return $this;
+    }
+
+    public function removeJob(Job $job): self {
+        if ($this->jobs->removeElement($job)) {
+            // set the owning side to null (unless already changed)
+            if ($job->getQuery() === $this) {
+                $job->setQuery(null);
+            }
+        }
 
         return $this;
     }

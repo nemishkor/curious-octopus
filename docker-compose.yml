@@ -28,3 +28,9 @@ services:
             - ./:/var/www/:cached
         depends_on:
             - db
+
+    rabbitmq:
+        container_name: rabbitmq
+        build: ./docker/rabbitmq
+        ports:
+            - "15671:15672"

@@ -35,6 +35,7 @@ RUN apk add --update --no-cache \
     php8-xmlwriter \
     php8-sodium \
     php8-pecl-apcu \
+    php8-pecl-amqp \
     nginx=1.20.2-r0 \
     supervisor \
     nodejs \

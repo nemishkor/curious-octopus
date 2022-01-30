@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Entity\Database;
-use App\Service\Dbal;
 use App\Service\Encryptor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,8 +25,8 @@ class DatabaseController extends AbstractController {
     ) {
     }
 
-    #[Route(path: '/api/databases', name: 'app_api_post_databases', methods: ['POST'])]
-    public function postDatabase(Request $request, Dbal $dbal): JsonResponse {
+    #[Route(path: '/api/databases', name: 'app_api_post_database', methods: ['POST'])]
+    public function postDatabase(Request $request): JsonResponse {
         $resolver = new OptionsResolver();
         $resolver
             ->define('host')->required()->allowedTypes('string')

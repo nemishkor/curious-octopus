@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Database;
+use App\Entity\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
@@ -42,6 +43,14 @@ class Dbal {
             'host' => $database->getHost(),
             'driver' => 'pdo_mysql',
         ]);
+    }
+
+    /**
+     * @throws Exception
+     * @throws SodiumException
+     */
+    public function query(Database $database, Query $query) {
+        return $this->getConnection($database)->executeQuery($query->getString())->fetchAllAssociative();
     }
 
 }
