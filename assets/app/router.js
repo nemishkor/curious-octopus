@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home'
 import Login from "./views/Login";
 import Queries from "./views/Queries";
+import Query from "./views/Query";
 
 Vue.use(Router)
 
@@ -23,6 +24,11 @@ export default new Router({
             path: '/queries/page/:page',
             name: 'queries',
             component: Queries
+        },
+        {
+            path: '/queries/item/:id',
+            name: 'query',
+            component: Query
         },
     ]
 })
