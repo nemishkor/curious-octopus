@@ -4,6 +4,7 @@ import Home from './views/Home'
 import Login from "./views/Login";
 import Queries from "./views/Queries";
 import Query from "./views/Query";
+import Databases from "./views/Databases";
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export default new Router({
             path: '/queries/item/:id',
             name: 'query',
             component: Query
+        },
+        {
+            path: '/databases/page/:page',
+            name: 'databases',
+            component: Databases
         },
     ]
 })

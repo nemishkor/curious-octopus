@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Entity\Database;
+use App\Enum\JobState;
+use App\Repository\DatabaseRepository;
+use App\Repository\JobRepository;
 use App\Service\Encryptor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,6 +26,52 @@ class DatabaseController extends AbstractController {
         private SerializerInterface $serializer,
         private Encryptor $encryptor
     ) {
+    }
+
+    #[Route(path: '/api/databases', methods: ['GET'])]
+    public function getDatabases(Request $request, DatabaseRepository $repository): JsonResponse {
+        $limit = 20;
+        return new JsonResponse(
+            $this->serializer->serialize(
+                [
+                    'items' => $repository->findBy(
+                        [],
+                        ['id' => 'DESC'],
+                        $limit,
+                        ($request->query->get('page', 1) - 1) * $limit
+                    ),
+                    'limit' => $limit,
+                    'total' => $repository->count([]),
+                ],
+                JsonEncoder::FORMAT,
+                ['groups' => ['database']]
+            ),
+            200,
+            [],
+            true
+        );
+    }
+
+    #[Route(path: '/api/databases/{database}', methods: ['GET'])]
+    public function deleteDatabase(Database $database, JobRepository $jobRepository): JsonResponse {
+        $busyJobsCount = $jobRepository->count(
+            ['database' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]]
+        );
+        if ($busyJobsCount > 0) {
+            return new JsonResponse(
+                [
+                    'title' => sprintf(
+                        'Unable to delete the database. %s unfinished job(s) are using the database',
+                        $busyJobsCount
+                    ),
+                ],
+                400
+            );
+        }
+        $this->entityManager->remove($database);
+        $this->entityManager->flush();
+
+        return new JsonResponse(null, 204);
     }
 
     #[Route(path: '/api/databases', name: 'app_api_post_database', methods: ['POST'])]
@@ -50,7 +99,7 @@ class DatabaseController extends AbstractController {
         $this->entityManager->flush();
 
         return new JsonResponse(
-            $this->serializer->serialize($database, JsonEncoder::FORMAT, ['database']),
+            $this->serializer->serialize($database, JsonEncoder::FORMAT, ['groups' => ['database']]),
             200, [], true
         );
     }

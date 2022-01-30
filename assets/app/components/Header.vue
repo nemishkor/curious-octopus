@@ -7,9 +7,16 @@
         </router-link>
       </div>
       <div class="flex flex-row ml-auto">
-        <MenuItem v-if="isAuthorized" :to="{name: 'queries', params: {page: 1}}">Queries</MenuItem>
+        <MenuItem v-if="isAuthorized"
+                  :to="{name: 'databases', params: {page: 1}}"
+                  class="ml-4">Databases
+        </MenuItem>
+        <MenuItem v-if="isAuthorized"
+                  :to="{name: 'queries', params: {page: 1}}"
+                  class="ml-4">Queries
+        </MenuItem>
         <button v-if="isAuthorized"
-                class="px-4 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-700 transition-colors duration-300"
+                class="ml-4 px-4 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-700 transition-colors duration-300"
                 @click="logout">Logout
         </button>
         <div v-if="isAuthorized" class="py-2 px-4">{{ user.email }}</div>
