@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\Entity\Database;
 use App\Entity\Job;
 use App\Entity\Query;
 use App\Enum\QueryState;
@@ -39,8 +40,7 @@ class DispatchQueryMessageHandler {
         } catch (Throwable $throwable) {
             $query->setState(QueryState::FAILED);
             $this->entityManager->flush();
-            /** @noinspection PhpUnhandledExceptionInspection */
-            throw $throwable; // retry
+            $this->logger->error('Unable to dispatch query', ['exception' => $throwable]);
         }
     }
 
@@ -67,7 +67,8 @@ class DispatchQueryMessageHandler {
                 $this->bus->dispatch(new ProcessJobMessage($job->getId()));
             }
             if ($page % 5 === 0) {
-                $this->entityManager->clear();
+                $this->entityManager->clear(Database::class);
+                $this->entityManager->clear(Job::class);
             }
             $page++;
         }

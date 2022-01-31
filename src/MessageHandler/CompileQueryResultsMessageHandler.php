@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\Entity\Job;
 use App\Entity\Query;
 use App\Enum\JobState;
 use App\Enum\QueryState;
@@ -75,7 +76,7 @@ class CompileQueryResultsMessageHandler {
                 ];
             }
             if ($page % 5 === 0) {
-                $this->entityManager->clear();
+                $this->entityManager->clear(Job::class);
             }
             $page++;
         }
