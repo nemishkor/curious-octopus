@@ -37,7 +37,7 @@
         <td class="py-2.5 px-0.5 text-center">{{ query.created.substr(0, 16).replace('T', ' ') }}</td>
         <td class="py-2.5 px-0.5 text-center">
           <span v-if="Number(query.progress_total) !== 0">{{
-              (query.progress_current || 0) * 100 / (query.progress_total || 1)
+              Number((query.progress_current || 0) * 100 / (query.progress_total || 1)).toFixed(2)
             }}%</span>
         </td>
         <td class="py-2.5 px-0.5 text-center">
