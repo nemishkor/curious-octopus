@@ -10,6 +10,7 @@ use App\Service\Dbal;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Throwable;
@@ -41,9 +42,17 @@ class ProcessJobMessageHandler {
         $this->entityManager->flush();
         try {
             $result = $this->dbal->query($job->getDb(), $job->getQuery());
-            $job->setState(JobState::DONE)->setResult($this->serializer->serialize($result, JsonEncoder::FORMAT));
+            $job->setState(JobState::DONE)
+                ->setResult(
+                    $this->serializer->serialize(
+                        $result,
+                        JsonEncoder::FORMAT,
+                        [JsonEncode::OPTIONS => JSON_INVALID_UTF8_SUBSTITUTE]
+                    )
+                );
         } catch (Throwable $throwable) {
-            $job->setState(JobState::FAILED)->setError($throwable->getMessage());
+            $job->setState(JobState::FAILED)
+                ->setError($throwable->getMessage() . '. ' . $throwable->getTraceAsString());
             /** @noinspection PhpUnhandledExceptionInspection */
             throw $throwable; // retry
         } finally {
