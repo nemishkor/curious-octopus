@@ -89,7 +89,7 @@ class JobResultsStorage {
                 );
                 $sheet->getColumnDimensionByColumn(4 + $sqlColumnIndex)->setWidth(24);
             }
-            $sheet->mergeCellsByColumnAndRow(4, 1, 4 + count($sqlColumns), 1);
+            $sheet->mergeCellsByColumnAndRow(4, 1, 3 + count($sqlColumns), 1);
         }
 
         $writer = new Xlsx($spreadsheet);
