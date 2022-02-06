@@ -12,14 +12,14 @@ class Job {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id;
 
     #[ORM\ManyToOne(targetEntity: Query::class, inversedBy: 'jobs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Query $query;
 
     #[ORM\ManyToOne(targetEntity: Database::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Database $db;
 
     #[ORM\Column(type: 'string', length: 255)]
