@@ -68,8 +68,7 @@ class QueryController extends AbstractController {
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
                 sprintf('%s-results.%s', $query->getId(), $format)
-            )
-            ->deleteFileAfterSend();
+            );
     }
 
     #[Route(path: '/api/queries/{query}/cancel', methods: ['PUT'])]
