@@ -42,8 +42,8 @@ export default {
   },
   methods: {
     logout: function () {
-      this.$store.commit('deleteUser');
-      this.login()
+      this.$store.commit('deleteUser')
+      this.$router.replace({name: 'login'})
     },
   }
 }
