@@ -33,6 +33,7 @@ RUN apk add --update --no-cache \
     php8-simplexml \
     php8-zip \
     php8-xmlwriter \
+    php8-xmlreader \
     php8-sodium \
     php8-pecl-apcu \
     php8-pecl-amqp \

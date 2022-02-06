@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Annotation\Route;
@@ -56,9 +57,18 @@ class QueryController extends AbstractController {
     }
 
     #[Route(path: '/api/queries/{query}/download-results', methods: ['GET'])]
-    public function downloadQuery(Query $query, JobResultsStorage $storage): BinaryFileResponse {
-        return (new BinaryFileResponse($storage->getFilename($query), 200, [], false))
-            ->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $query->getId() . '-results.json')
+    public function downloadQuery(Query $query, Request $request, JobResultsStorage $storage): BinaryFileResponse {
+        $format = $request->query->get('format');
+        $filename = match ($format) {
+            'json' => $storage->getJsonFilename($query),
+            'xlsx' => $storage->getXlsxFilename($query),
+            default => throw new BadRequestHttpException(sprintf('Unknown file format "%s"', $format)),
+        };
+        return (new BinaryFileResponse($filename, 200, [], false))
+            ->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                sprintf('%s-results.%s', $query->getId(), $format)
+            )
             ->deleteFileAfterSend();
     }
 

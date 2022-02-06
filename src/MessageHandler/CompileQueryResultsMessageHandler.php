@@ -44,7 +44,9 @@ class CompileQueryResultsMessageHandler {
         try {
             $query->setState(QueryState::COMPILING);
             $this->entityManager->flush();
-            $this->storage->saveAsJson($query, $this->getResults($query));
+            $results = $this->getResults($query);
+            $this->storage->saveAsJson($query, $results);
+            $this->storage->saveAsXlsx($query, $results);
             $query->setState(JobState::DONE);
             $this->entityManager->persist($query);
             $this->entityManager->flush();
@@ -94,7 +96,6 @@ class CompileQueryResultsMessageHandler {
             }
             $page++;
         }
-        $this->logger->info(sprintf('Query %s results', $query->getId()), ['data' => $results]);
 
         return $results;
     }

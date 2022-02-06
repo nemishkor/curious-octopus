@@ -45,7 +45,11 @@
           {{ query.progress_current || 0 }}/{{ query.progress_total || 0 }}
         </td>
         <td class="text-center">
-          <VueButton v-if="query.state === 'done'" :onClick="function(){ download(query.id, 'json') }" label="json"
+          <VueButton v-if="query.state === 'done'" :onClick="function(){ download(query.id, 'json') }"
+                     label="json"
+                     size="small"/>
+          <VueButton v-if="query.state === 'done'" :onClick="function(){ download(query.id, 'xlsx') }"
+                     label="xlsx"
                      size="small"/>
           <VueButton v-if="query.state !== 'canceled' && query.state !== 'done' && query.state !== 'failed'"
                      :onClick="function(){ cancel(query.id) }" label="cancel"
