@@ -15,7 +15,7 @@ services:
     app:
         container_name: app
         build:
-            context: ./docker/app
+            context: ./.docker/app
             args:
                 PHP_XDEBUG_MODE: off
                 PHP_XDEBUG_CLIENT_PORT: 9001
@@ -33,6 +33,6 @@ services:
 
     rabbitmq:
         container_name: rabbitmq
-        build: ./docker/rabbitmq
+        build: ./.docker/rabbitmq
         ports:
             - "15671:15672"
