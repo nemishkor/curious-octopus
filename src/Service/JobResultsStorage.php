@@ -75,9 +75,14 @@ class JobResultsStorage {
                 }
                 $rowIndex++;
             }
-            $sheet->mergeCellsByColumnAndRow(1, $jobOutputRowIndexStart, 1, $rowIndex - 1);
-            $sheet->mergeCellsByColumnAndRow(2, $jobOutputRowIndexStart, 2, $rowIndex - 1);
-            $sheet->mergeCellsByColumnAndRow(3, $jobOutputRowIndexStart, 3, $rowIndex - 1);
+            if ($rowIndex === $jobOutputRowIndexStart) {
+                $rowIndex++;
+            }
+            if ($rowIndex > $jobOutputRowIndexStart) {
+                $sheet->mergeCellsByColumnAndRow(1, $jobOutputRowIndexStart, 1, $rowIndex - 1);
+                $sheet->mergeCellsByColumnAndRow(2, $jobOutputRowIndexStart, 2, $rowIndex - 1);
+                $sheet->mergeCellsByColumnAndRow(3, $jobOutputRowIndexStart, 3, $rowIndex - 1);
+            }
         }
 
         if ($sqlColumns !== null) {
@@ -89,7 +94,9 @@ class JobResultsStorage {
                 );
                 $sheet->getColumnDimensionByColumn(4 + $sqlColumnIndex)->setWidth(24);
             }
-            $sheet->mergeCellsByColumnAndRow(4, 1, 3 + count($sqlColumns), 1);
+            if (count($sqlColumns) > 1) {
+                $sheet->mergeCellsByColumnAndRow(4, 1, 3 + count($sqlColumns), 1);
+            }
         }
 
         $writer = new Xlsx($spreadsheet);
