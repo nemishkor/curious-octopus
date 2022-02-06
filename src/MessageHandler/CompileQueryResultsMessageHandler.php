@@ -12,6 +12,7 @@ use App\Repository\JobRepository;
 use App\Repository\QueryRepository;
 use App\Service\JobResultsStorage;
 use Doctrine\ORM\EntityManagerInterface;
+use JsonException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
@@ -69,10 +70,19 @@ class CompileQueryResultsMessageHandler {
                 break;
             }
             foreach ($jobs as $job) {
+                $result = null;
+                $error = $job->getError();
+                if ($job->getResult() !== null) {
+                    try {
+                        $result = json_decode($job->getResult(), true, 512, JSON_THROW_ON_ERROR);
+                    } catch (JsonException $e) {
+                        $error = ($error === null ? '' : $error . '. ') . $e->getMessage();
+                    }
+                }
                 $results[] = [
                     'database' => ['host' => $job->getDb()->getHost(), 'name' => $job->getDb()->getName()],
-                    'result' => json_decode($job->getResult(), true, 512, JSON_THROW_ON_ERROR),
-                    'error' => $job->getError(),
+                    'result' => $result,
+                    'error' => $error,
                 ];
             }
             if ($page % 5 === 0) {
