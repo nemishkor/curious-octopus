@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Entity\Query;
+use App\Enum\JobState;
+use App\Enum\QueryState;
 use App\Messages\DispatchQueryMessage;
 use App\Repository\QueryRepository;
 use App\Service\JobResultsStorage;
@@ -60,6 +62,30 @@ class QueryController extends AbstractController {
             ->deleteFileAfterSend();
     }
 
+    #[Route(path: '/api/queries/{query}/cancel', methods: ['PUT'])]
+    public function cancelQuery(Query $query): JsonResponse {
+        if ($query->getState() === QueryState::CANCELED) {
+            return new JsonResponse(
+                $this->serializer->serialize($query, JsonEncoder::FORMAT, ['groups' => ['query']]),
+                200, [], true
+            );
+        }
+        if (in_array($query->getState(), [QueryState::DONE, QueryState::FAILED], true)) {
+            return new JsonResponse(['message' => 'Unable to cancel already finished query'], 400);
+        }
+        $query->setState(QueryState::CANCELED);
+        foreach ($query->getJobs() as $job) {
+            if (!in_array($job->getState(), [JobState::FAILED, JobState::DONE])) {
+                $job->setState(JobState::CANCELED);
+            }
+        }
+        $this->entityManager->flush();
+        return new JsonResponse(
+            $this->serializer->serialize($query, JsonEncoder::FORMAT, ['groups' => ['query']]),
+            200, [], true
+        );
+    }
+
     #[Route(path: '/api/queries', name: 'app_api_post_query', methods: ['POST'])]
     public function postQuery(Request $request, MessageBusInterface $bus): JsonResponse {
         $resolver = new OptionsResolver();
@@ -68,17 +94,14 @@ class QueryController extends AbstractController {
         $query = (new Query())->setString($payload['string']);
         $violationsList = $this->validator->validate($query);
         if ($violationsList->count() > 0) {
-            return new JsonResponse(
-                $this->serializer->serialize($violationsList, JsonEncoder::FORMAT),
-                400, [], true
-            );
+            return new JsonResponse($this->serializer->serialize($violationsList, JsonEncoder::FORMAT), 400, [], true);
         }
         $this->entityManager->persist($query);
         $this->entityManager->flush();
         $bus->dispatch(new DispatchQueryMessage($query->getId()));
 
         return new JsonResponse(
-            $this->serializer->serialize($query, JsonEncoder::FORMAT, ['query']),
+            $this->serializer->serialize($query, JsonEncoder::FORMAT, ['groups' => ['query']]),
             200, [], true
         );
     }

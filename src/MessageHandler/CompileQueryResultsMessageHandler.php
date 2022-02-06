@@ -37,6 +37,10 @@ class CompileQueryResultsMessageHandler {
             );
             return;
         }
+        if ($query->getState() === QueryState::CANCELED) {
+            $this->logger->debug(sprintf('Skip processing query %s', $query->getId()));
+            return;
+        }
         try {
             $query->setState(QueryState::COMPILING);
             $this->entityManager->flush();

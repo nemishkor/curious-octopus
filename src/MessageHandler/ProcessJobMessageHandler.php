@@ -33,6 +33,10 @@ class ProcessJobMessageHandler {
             );
             return;
         }
+        if ($job->getState() === JobState::CANCELED) {
+            $this->logger->debug(sprintf('Skip processing job %s', $job->getId()));
+            return;
+        }
         $job->setState(JobState::IN_PROGRESS);
         $this->entityManager->flush();
         try {

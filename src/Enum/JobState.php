@@ -9,5 +9,6 @@ abstract class JobState {
     public const IN_PROGRESS = 'in_progress';
     public const DONE = 'done';
     public const FAILED = 'failed';
+    public const CANCELED = 'canceled';
 
 }

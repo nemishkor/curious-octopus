@@ -35,6 +35,10 @@ class DispatchQueryMessageHandler {
             );
             return;
         }
+        if ($query->getState() === QueryState::CANCELED) {
+            $this->logger->debug(sprintf('Skip getting together results of query %s', $query->getId()));
+            return;
+        }
         try {
             $this->dispatch($query);
         } catch (Throwable $throwable) {

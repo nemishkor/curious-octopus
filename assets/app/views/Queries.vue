@@ -5,6 +5,7 @@
     </VueHeader>
     <Loader v-if="loading"/>
     <SomethingWentWrongMessage v-if="error"/>
+    <Alert v-if="errorMessage !== ''">{{ errorMessage }}</Alert>
 
     <table class="bg-white rounded-xl mt-4 w-full shadow-md overflow-hidden">
       <thead>
@@ -46,6 +47,10 @@
         <td class="text-center">
           <VueButton v-if="query.state === 'done'" :onClick="function(){ download(query.id, 'json') }" label="json"
                      size="small"/>
+          <VueButton v-if="query.state !== 'canceled' && query.state !== 'done' && query.state !== 'failed'"
+                     :onClick="function(){ cancel(query.id) }" label="cancel"
+                     size="small"
+                     type="warning"/>
         </td>
       </tr>
       </tbody>
@@ -66,13 +71,15 @@ import Loader from '../components/Loader'
 import SomethingWentWrongMessage from "../components/SomethingWentWrongMessage";
 import VueHeader from "../components/VueHeader";
 import VueButton from "../components/VueButton"
+import Alert from "../components/Alert";
 
 export default {
   name: "Queries",
-  components: {VueHeader, VueButton, SomethingWentWrongMessage, Loader},
+  components: {Alert, VueHeader, VueButton, SomethingWentWrongMessage, Loader},
   data: function () {
     return {
       error: false,
+      errorMessage: '',
       loading: false,
       items: [],
       limit: 0,
@@ -166,6 +173,47 @@ export default {
             URL.revokeObjectURL(url);
           });
     },
+    cancel(id) {
+      this.error = false
+      this.loading = true
+      this.errorMessage = ''
+      fetch(
+          `${process.env.API_URL}api/queries/${id}/cancel`,
+          {method: 'PUT', headers: {'X-API-TOKEN': this.$store.getters.token}}
+      ).then(
+          (response) => {
+            this.loading = false
+            if (response.status === 403) {
+              this.$store.commit('deleteUser')
+              this.$router.replace({name: 'login'})
+              return
+            }
+            if (response.status !== 200 && response.status !== 400) {
+              this.error = true
+              console.error('Invalid response status from API: ' + response.status)
+              return
+            }
+            response.json().then(
+                (data) => {
+                  if (response.status === 400) {
+                    this.errorMessage = data.message
+                    return
+                  }
+                  this.fetchData()
+                },
+                (error) => {
+                  this.error = true;
+                  console.error('Invalid response data from API: ' + error)
+                }
+            )
+          },
+          (any) => {
+            this.loading = false
+            this.error = true
+            console.error('Request to server is failed', any)
+          }
+      )
+    }
   }
 }
 </script>

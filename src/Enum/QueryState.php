@@ -10,5 +10,6 @@ abstract class QueryState {
     public const COMPILING = 'compiling';
     public const DONE = 'done';
     public const FAILED = 'failed';
+    public const CANCELED = 'canceled';
 
 }
