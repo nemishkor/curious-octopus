@@ -15,7 +15,7 @@ services:
     app:
         container_name: curious-octopus-app
         build:
-            context: ./.docker/app
+            context: ./docker/app
             args:
                 PHP_XDEBUG_MODE: off
                 PHP_XDEBUG_CLIENT_PORT: 9001
@@ -27,12 +27,12 @@ services:
             - "8091:80"
             - "9001:9001"
         volumes:
-            - ./:/var/www/:cached
+            - ./app/:/var/www/:cached
         depends_on:
             - db
 
     rabbitmq:
         container_name: curious-octopus-rabbitmq
-        build: ./.docker/rabbitmq
+        build: ./docker/rabbitmq
         ports:
             - "15671:15672"
