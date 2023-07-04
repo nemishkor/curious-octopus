@@ -1,48 +1,53 @@
-FROM alpine:3.15
+FROM php:8.1-fpm-alpine3.18
 
 RUN apk add --update --no-cache \
-    make \
     curl \
     nano \
     git \
-    ca-certificates \
-    coreutils \
+    # for usermod and groupmod
+    shadow \
+    # for envsubst command
     gettext \
-    php8-fpm \
-    php8-posix \
-    php8-ctype \
-    php8-curl \
-    php8-dom \
-    php8-gd \
-    php8-iconv \
-    php8-json \
-    php8-intl \
-    php8-fileinfo\
-    php8-mbstring \
-    php8-opcache \
-    php8-openssl \
-    php8-pdo \
-    php8-pdo_mysql \
-    php8-mysqli \
-    php8-xml \
-    php8-xsl \
-    php8-zlib \
-    php8-phar \
-    php8-tokenizer \
-    php8-session \
-    php8-simplexml \
-    php8-zip \
-    php8-xmlwriter \
-    php8-xmlreader \
-    php8-sodium \
-    php8-pecl-apcu \
-    php8-pecl-amqp \
+    # to run build as www-data user
+    sudo \
     nginx \
     supervisor \
+    # for amqp php extension
+    rabbitmq-c \
+    # for zip php extension
+    libzip \
+    # for gd php extension \
+    freetype \
+    # front-end
     nodejs \
-    npm; \
-    rm -rf /var/cache/apk/*; \
-    npm install --global yarn
+    npm \
+    && npm install --global yarn
+
+RUN apk add --virtual .build-deps \
+    g++ make \
+    # pecl install requires autoconf
+    autoconf \
+    # for amqp php extension
+    rabbitmq-c-dev \
+    # for zip php extension
+    libzip-dev \
+    # to build intl php extension
+    icu-dev \
+    # for gd php extension
+    freetype-dev \
+    && docker-php-ext-configure gd --with-freetype \
+    && docker-php-ext-install -j$(nproc) pdo_mysql sysvshm opcache intl zip gd \
+    && pecl install apcu-5.1.22 \
+    && pecl install amqp-1.11.0 \
+    && apk del --purge .build-deps \
+    && docker-php-ext-enable apcu amqp \
+    && rm -rf /var/cache/apk/*
+
+ARG PHP_OPCACHE_ENABLE="1"
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini.template
+RUN export PHP_OPCACHE_ENABLE=$PHP_OPCACHE_ENABLE; \
+    envsubst < /usr/local/etc/php/conf.d/opcache.ini.template > /usr/local/etc/php/conf.d/40-opcache.ini
+RUN rm -f /usr/local/etc/php/conf.d/opcache.ini.template
 
 # install gnu-libiconv and set LD_PRELOAD env to make iconv work fully on Alpine image.
 # see https://github.com/docker-library/php/issues/240#issuecomment-763112749
@@ -62,10 +67,7 @@ RUN if [[ "$PHP_XDEBUG_MODE" != "" ]]; then \
     fi
 RUN rm -f /etc/php8/conf.d/xdebug.ini.template
 
-RUN curl -sS https://getcomposer.org/installer | tee composer-setup.php \
-    && php8 composer-setup.php && rm composer-setup.php* \
-    && chmod +x composer.phar && mv composer.phar /usr/bin/composer \
-    && ln -s /usr/bin/php8 /usr/local/bin/php
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 ARG SYMFONY_CLI_VERSION
 RUN wget https://github.com/symfony/cli/releases/download/v$SYMFONY_CLI_VERSION/symfony_linux_amd64.gz; \
@@ -73,21 +75,27 @@ RUN wget https://github.com/symfony/cli/releases/download/v$SYMFONY_CLI_VERSION/
     chmod +x symfony_linux_amd64; \
     mv symfony_linux_amd64 /usr/local/bin/symfony
 
+ARG UID=82
+ARG GID=82
 RUN set -x; \
-    addgroup -g 82 -S www-data; \
-    adduser -u 82 -D -S -G www-data www-data; \
-    addgroup -g 1000 -S user; \
-    adduser -u 1000 -D -S -s /bin/bash -G user user; \
-    adduser www-data user; \
+    usermod -u $UID www-data; \
+    groupmod -g $GID www-data; \
     mkdir -p /root/.config/yarn; \
     chmod -R 777 /root
 
-COPY symfony.ini /etc/php8/conf.d/
-COPY symfony.ini /etc/php8/cli/conf.d/
+COPY php.ini /usr/local/etc/php/php.ini
 COPY nginx/nginx.conf /etc/nginx/
 COPY nginx/app.conf /etc/nginx/conf.d/app.conf
 COPY supervisor.conf /etc/supervisor/supervisor.conf
 
+ARG APP_ENV=prod
+ENV APP_ENV $APP_ENV
+ARG COMPOSER_NO_DEV
+ENV COMPOSER_NO_DEV $COMPOSER_NO_DEV
+
 WORKDIR /var/www
 
-CMD ["supervisord", "-c", "/etc/supervisor/supervisor.conf"]
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod u+x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

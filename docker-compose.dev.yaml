@@ -11,28 +11,39 @@ services:
             MYSQL_DATABASE: curious_octopus
         volumes:
             - ./db:/var/lib/mysql
+        healthcheck:
+            test: "mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD"
+            interval: 3s
+            timeout: 10s
+            retries: 60
 
     app:
         container_name: curious-octopus-app
         build:
             context: ./docker/app
             args:
+                APP_ENV: 'dev'
+                COMPOSER_NO_DEV: '0'
                 PHP_XDEBUG_MODE: off
                 PHP_XDEBUG_CLIENT_PORT: 9001
                 PHP_XDEBUG_CLIENT_HOST: host.docker.internal
+                PHP_OPCACHE_ENABLE: '0'
                 SYMFONY_CLI_VERSION: 4.28.1
+                UID: '1000'
+                GID: '1000'
         environment:
             API_URL: 'http://localhost:8091/'
         ports:
-            - "8091:80"
+            - "80:80"
             - "9001:9001"
         volumes:
             - ./app/:/var/www/:cached
         depends_on:
-            - db
+            db:
+                condition: service_healthy
 
     rabbitmq:
         container_name: curious-octopus-rabbitmq
         build: ./docker/rabbitmq
         ports:
-            - "15671:15672"
+            - "15672:15672"
