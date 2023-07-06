@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Throwable;
 
 #[AsMessageHandler]
-class ProcessJobMessageHandler {
+readonly class ProcessJobMessageHandler {
 
     public function __construct(
         private EntityManagerInterface $entityManager,

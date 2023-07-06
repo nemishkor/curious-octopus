@@ -13,14 +13,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class QueryService {
+readonly class QueryService {
 
     public function __construct(
         private EntityManagerInterface $entityManager,
         private QueryRepository $queryRepository,
         private JobRepository $jobRepository,
         private LoggerInterface $logger,
-        private MessageBusInterface $bus
+        private MessageBusInterface $bus,
     ) {
     }
 
@@ -35,7 +35,7 @@ class QueryService {
                 ['state' => QueryState::SCRAPPING],
                 ['id' => 'ASC'],
                 $limit,
-                ($page - 1) * $limit
+                ($page - 1) * $limit,
             );
             if (count($queries) === 0) {
                 break;

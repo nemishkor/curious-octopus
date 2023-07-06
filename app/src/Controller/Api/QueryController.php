@@ -26,9 +26,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class QueryController extends AbstractController {
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private ValidatorInterface $validator,
-        private SerializerInterface $serializer
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ValidatorInterface $validator,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -42,13 +42,13 @@ class QueryController extends AbstractController {
                         [],
                         ['id' => 'DESC'],
                         $limit,
-                        ($request->query->get('page', 1) - 1) * $limit
+                        ($request->query->get('page', 1) - 1) * $limit,
                     ),
                     'limit' => $limit,
                     'total' => $queryRepository->count([]),
                 ],
                 JsonEncoder::FORMAT,
-                ['groups' => ['query']]
+                ['groups' => ['query']],
             ),
             200,
             [],
@@ -67,7 +67,7 @@ class QueryController extends AbstractController {
         return (new BinaryFileResponse($filename, 200, [], false))
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                sprintf('%s-results.%s', $query->getId(), $format)
+                sprintf('%s-results.%s', $query->getId(), $format),
             );
     }
 

@@ -25,7 +25,7 @@ class Encryptor {
     public function __construct(string $secretsDir, string|Stringable $decryptionKey = null) {
         $this->pathPrefix = rtrim(
                 strtr($secretsDir, '/', DIRECTORY_SEPARATOR),
-                DIRECTORY_SEPARATOR
+                DIRECTORY_SEPARATOR,
             ) . DIRECTORY_SEPARATOR . basename($secretsDir) . '.';
         $this->decryptionKey = $decryptionKey;
     }
@@ -39,8 +39,8 @@ class Encryptor {
         return bin2hex(
             sodium_crypto_box_seal(
                 $value,
-                $this->encryptionKey ?? sodium_crypto_box_publickey($this->decryptionKey)
-            )
+                $this->encryptionKey ?? sodium_crypto_box_publickey($this->decryptionKey),
+            ),
         );
     }
 
@@ -65,7 +65,7 @@ class Encryptor {
 
         if (is_file($this->pathPrefix . 'encrypt.public.php')) {
             $this->encryptionKey = (string)include $this->pathPrefix . 'encrypt.public.php';
-        } elseif ('' !== $this->decryptionKey) {
+        } else if ('' !== $this->decryptionKey) {
             $this->encryptionKey = sodium_crypto_box_publickey($this->decryptionKey);
         } else {
             throw new RuntimeException(sprintf('Encryption key not found in "%s".', dirname($this->pathPrefix)));
@@ -75,7 +75,7 @@ class Encryptor {
             throw new Exception(
                 sprintf(
                     'Unable to decrypt as no decryption key was found in "%s".',
-                    $this->getPrettyPath(dirname($this->pathPrefix) . DIRECTORY_SEPARATOR)
+                    $this->getPrettyPath(dirname($this->pathPrefix) . DIRECTORY_SEPARATOR),
                 )
             );
         }
@@ -95,7 +95,7 @@ class Encryptor {
             throw new Exception(
                 sprintf(
                     'Unable to decrypt as the wrong decryption key was provided for "%s".',
-                    $this->getPrettyPath(dirname($this->pathPrefix) . DIRECTORY_SEPARATOR)
+                    $this->getPrettyPath(dirname($this->pathPrefix) . DIRECTORY_SEPARATOR),
                 )
             );
         }

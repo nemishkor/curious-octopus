@@ -18,7 +18,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Throwable;
 
 #[AsMessageHandler]
-class CompileQueryResultsMessageHandler {
+readonly class CompileQueryResultsMessageHandler {
 
     public function __construct(
         private EntityManagerInterface $entityManager,

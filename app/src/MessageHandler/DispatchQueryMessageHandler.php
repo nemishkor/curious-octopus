@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Throwable;
 
 #[AsMessageHandler]
-class DispatchQueryMessageHandler {
+readonly class DispatchQueryMessageHandler {
 
     public function __construct(
         private EntityManagerInterface $entityManager,

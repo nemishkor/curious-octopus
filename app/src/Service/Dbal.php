@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception;
 use Psr\Log\LoggerInterface;
 use SodiumException;
 
-class Dbal {
+readonly class Dbal {
 
     public function __construct(
         private Encryptor $encryptor,

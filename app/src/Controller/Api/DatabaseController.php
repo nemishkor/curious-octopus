@@ -21,10 +21,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class DatabaseController extends AbstractController {
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private ValidatorInterface $validator,
-        private SerializerInterface $serializer,
-        private Encryptor $encryptor
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ValidatorInterface $validator,
+        private readonly SerializerInterface $serializer,
+        private readonly Encryptor $encryptor,
     ) {
     }
 
@@ -45,13 +45,13 @@ class DatabaseController extends AbstractController {
                         [],
                         ['id' => 'DESC'],
                         $limit,
-                        ($request->query->get('page', 1) - 1) * $limit
+                        ($request->query->get('page', 1) - 1) * $limit,
                     ),
                     'limit' => $limit,
                     'total' => $repository->count([]),
                 ],
                 JsonEncoder::FORMAT,
-                ['groups' => ['database']]
+                ['groups' => ['database']],
             ),
             200,
             [],
@@ -62,14 +62,14 @@ class DatabaseController extends AbstractController {
     #[Route(path: '/api/databases/{database}', methods: ['DELETE'])]
     public function deleteDatabase(Database $database, JobRepository $jobRepository): JsonResponse {
         $busyJobsCount = $jobRepository->count(
-            ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]]
+            ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]],
         );
         if ($busyJobsCount > 0) {
             return new JsonResponse(
                 [
                     'title' => sprintf(
                         'Unable to delete the database. %s unfinished job(s) are using the database',
-                        $busyJobsCount
+                        $busyJobsCount,
                     ),
                 ],
                 400
@@ -91,14 +91,14 @@ class DatabaseController extends AbstractController {
             ->define('name')->required()->allowedTypes('string');
         $payload = $resolver->resolve(json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR));
         $busyJobsCount = $jobRepository->count(
-            ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]]
+            ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]],
         );
         if ($busyJobsCount > 0) {
             return new JsonResponse(
                 [
                     'title' => sprintf(
                         'Unable to delete the database. %s unfinished job(s) are using the database',
-                        $busyJobsCount
+                        $busyJobsCount,
                     ),
                 ],
                 400

@@ -12,7 +12,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class JobResultsStorage {
+readonly class JobResultsStorage {
 
     public function __construct(
         private string $resultsDir,

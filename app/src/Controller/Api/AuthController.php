@@ -16,8 +16,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 class AuthController extends AbstractController {
 
     public function __construct(
-        private Security $security,
-        private SerializerInterface $serializer,
+        private readonly Security $security,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 

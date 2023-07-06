@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CreateUser extends Command {
 
     public function __construct(
-        private UserService $userService,
+        readonly private UserService $userService,
     ) {
         parent::__construct();
     }
@@ -24,7 +24,7 @@ class CreateUser extends Command {
         $this->addArgument('password', InputArgument::REQUIRED);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output) {
+    public function execute(InputInterface $input, OutputInterface $output): int {
         $this->userService->create(
             email: $input->getArgument('email'),
             password: $input->getArgument('password'),

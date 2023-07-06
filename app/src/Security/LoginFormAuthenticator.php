@@ -22,13 +22,13 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use UnexpectedValueException;
 
-class LoginFormAuthenticator implements AuthenticatorInterface {
+readonly class LoginFormAuthenticator implements AuthenticatorInterface {
 
     public const API_TOKEN_ATTRIBUTE = 'API_TOKEN';
 
     public function __construct(
         private UserProviderInterface $userProvider,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -69,7 +69,7 @@ class LoginFormAuthenticator implements AuthenticatorInterface {
         $message = match (get_class($exception)) {
             CustomUserMessageAuthenticationException::class, TooManyLoginAttemptsAuthenticationException::class => strtr(
                 $exception->getMessageKey(),
-                $exception->getMessageData()
+                $exception->getMessageData(),
             ),
             BadCredentialsException::class => 'Invalid credentials',
             default => 'Authentication failed'

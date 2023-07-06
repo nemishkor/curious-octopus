@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Messages;
 
-class DispatchQueryMessage {
+readonly class DispatchQueryMessage {
 
     public function __construct(private int $queryId) {
     }

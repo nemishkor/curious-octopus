@@ -7,7 +7,7 @@ use DateInterval;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 
-class DaemonBreaker {
+readonly class DaemonBreaker {
 
     private int $startTime;
     private int $timeLimit;

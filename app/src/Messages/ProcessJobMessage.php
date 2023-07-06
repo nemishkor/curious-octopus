@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Messages;
 
-class ProcessJobMessage {
+readonly class ProcessJobMessage {
 
     public function __construct(private int $jobId) {
     }

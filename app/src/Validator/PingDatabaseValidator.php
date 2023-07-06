@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class PingDatabaseValidator extends ConstraintValidator {
 
-    public function __construct(private Dbal $dbal) {
+    public function __construct(private readonly Dbal $dbal) {
     }
 
     public function validate(mixed $value, Constraint $constraint) {

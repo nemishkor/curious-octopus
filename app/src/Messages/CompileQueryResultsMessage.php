@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Messages;
 
-class CompileQueryResultsMessage {
+readonly class CompileQueryResultsMessage {
 
     public function __construct(private int $queryId) {
     }

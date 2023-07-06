@@ -19,7 +19,7 @@ class WatchQueriesCommand extends Command {
     use LockableTrait;
 
     public function __construct(
-        private QueryService $queryService,
+        private readonly QueryService $queryService,
     ) {
         parent::__construct();
     }
