@@ -34,13 +34,32 @@ services:
         environment:
             API_URL: 'http://localhost:8091/'
         ports:
-            - "80:80"
             - "9001:9001"
         volumes:
             - ./app/:/var/www/:cached
         depends_on:
             db:
                 condition: service_healthy
+
+    server:
+        container_name: curious-octopus-server
+        build:
+            dockerfile: Dockerfile
+            context: ./docker/nginx
+            args:
+                UID: '1000'
+                GID: '1000'
+                CERTBOT_RENEW: 'no'
+        volumes:
+            - ./app:/var/www
+            - ./docker/nginx/templates/default.conf.template:/etc/nginx/templates/default.conf.template
+        ports:
+            - "80:80"
+        env_file:
+            - .env
+            - .env.nginx.dev
+        depends_on:
+            - app
 
     rabbitmq:
         container_name: curious-octopus-rabbitmq

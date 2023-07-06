@@ -10,7 +10,6 @@ RUN apk add --update --no-cache \
     gettext \
     # to run build as www-data user
     sudo \
-    nginx \
     supervisor \
     # for amqp php extension
     rabbitmq-c \
@@ -84,8 +83,6 @@ RUN set -x; \
     chmod -R 777 /root
 
 COPY php.ini /usr/local/etc/php/php.ini
-COPY nginx/nginx.conf /etc/nginx/
-COPY nginx/app.conf /etc/nginx/conf.d/app.conf
 COPY supervisor.conf /etc/supervisor/supervisor.conf
 
 ARG APP_ENV=prod

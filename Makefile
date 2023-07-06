@@ -1,4 +1,5 @@
 init-dev:
+	cp .env.example .env
 	cp docker-compose.dev.yaml docker-compose.yaml
 
 pre-test:
