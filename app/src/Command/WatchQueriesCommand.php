@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\DaemonBreaker;
 use App\Service\QueryService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,11 +29,12 @@ class WatchQueriesCommand extends Command {
             $output->writeln('The command is already running in another process.');
             return Command::INVALID;
         }
-        $attempt = 1;
-        while ($attempt < 20) {
+
+        $daemonBreaker = new DaemonBreaker(pause: 3);
+
+        while ($daemonBreaker->isOkToGo()) {
             $this->queryService->checkQueriesInScrappingStatus();
-            sleep(3);
-            $attempt++;
+            $daemonBreaker->next();
         }
 
         return Command::SUCCESS;
