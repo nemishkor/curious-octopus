@@ -6,18 +6,17 @@ namespace App\Controller\Api;
 use App\Entity\User\ApiToken;
 use App\Security\LoginFormAuthenticator;
 use RuntimeException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class AuthController extends AbstractController {
+readonly class AuthController {
 
     public function __construct(
-        private readonly Security $security,
-        private readonly SerializerInterface $serializer,
+        private Security $security,
+        private SerializerInterface $serializer,
     ) {
     }
 

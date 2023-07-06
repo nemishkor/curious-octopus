@@ -10,7 +10,6 @@ use App\Messages\DispatchQueryMessage;
 use App\Repository\QueryRepository;
 use App\Service\JobResultsStorage;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,29 +22,32 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class QueryController extends AbstractController {
+readonly class QueryController {
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator,
-        private readonly SerializerInterface $serializer,
+        private EntityManagerInterface $entityManager,
+        private ValidatorInterface $validator,
+        private SerializerInterface $serializer,
+        private QueryRepository $queryRepository,
+        private JobResultsStorage $storage,
+        private MessageBusInterface $bus,
     ) {
     }
 
     #[Route(path: '/api/queries', methods: ['GET'])]
-    public function getQueries(Request $request, QueryRepository $queryRepository): JsonResponse {
+    public function getQueries(Request $request): JsonResponse {
         $limit = 20;
         return new JsonResponse(
             $this->serializer->serialize(
                 [
-                    'items' => $queryRepository->findBy(
+                    'items' => $this->queryRepository->findBy(
                         [],
                         ['id' => 'DESC'],
                         $limit,
                         ($request->query->get('page', 1) - 1) * $limit,
                     ),
                     'limit' => $limit,
-                    'total' => $queryRepository->count([]),
+                    'total' => $this->queryRepository->count([]),
                 ],
                 JsonEncoder::FORMAT,
                 ['groups' => ['query']],
@@ -57,11 +59,11 @@ class QueryController extends AbstractController {
     }
 
     #[Route(path: '/api/queries/{query}/download-results', methods: ['GET'])]
-    public function downloadQuery(Query $query, Request $request, JobResultsStorage $storage): BinaryFileResponse {
+    public function downloadQuery(Query $query, Request $request): BinaryFileResponse {
         $format = $request->query->get('format');
         $filename = match ($format) {
-            'json' => $storage->getJsonFilename($query),
-            'xlsx' => $storage->getXlsxFilename($query),
+            'json' => $this->storage->getJsonFilename($query),
+            'xlsx' => $this->storage->getXlsxFilename($query),
             default => throw new BadRequestHttpException(sprintf('Unknown file format "%s"', $format)),
         };
         return (new BinaryFileResponse($filename, 200, [], false))
@@ -96,7 +98,7 @@ class QueryController extends AbstractController {
     }
 
     #[Route(path: '/api/queries', name: 'app_api_post_query', methods: ['POST'])]
-    public function postQuery(Request $request, MessageBusInterface $bus): JsonResponse {
+    public function postQuery(Request $request): JsonResponse {
         $resolver = new OptionsResolver();
         $resolver->define('string')->required()->allowedTypes('string');
         $payload = $resolver->resolve(json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR));
@@ -107,7 +109,7 @@ class QueryController extends AbstractController {
         }
         $this->entityManager->persist($query);
         $this->entityManager->flush();
-        $bus->dispatch(new DispatchQueryMessage($query->getId()));
+        $this->bus->dispatch(new DispatchQueryMessage($query->getId()));
 
         return new JsonResponse(
             $this->serializer->serialize($query, JsonEncoder::FORMAT, ['groups' => ['query']]),

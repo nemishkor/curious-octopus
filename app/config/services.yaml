@@ -39,3 +39,15 @@ services:
     App\Service\JobResultsStorage:
         arguments:
             $resultsDir: '%kernel.project_dir%/var/job-results'
+
+    App\Controller\Api\AuthController:
+        public: true
+
+    App\Controller\Api\DatabaseController:
+        public: true
+
+    App\Controller\Api\QueryController:
+        public: true
+
+    App\Controller\AppController:
+        public: true

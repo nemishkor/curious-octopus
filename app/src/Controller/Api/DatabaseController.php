@@ -9,7 +9,6 @@ use App\Repository\DatabaseRepository;
 use App\Repository\JobRepository;
 use App\Service\Encryptor;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -18,13 +17,15 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class DatabaseController extends AbstractController {
+readonly class DatabaseController {
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator,
-        private readonly SerializerInterface $serializer,
-        private readonly Encryptor $encryptor,
+        private EntityManagerInterface $entityManager,
+        private ValidatorInterface $validator,
+        private SerializerInterface $serializer,
+        private Encryptor $encryptor,
+        private DatabaseRepository $repository,
+        private JobRepository $jobRepository,
     ) {
     }
 
@@ -36,19 +37,19 @@ class DatabaseController extends AbstractController {
     }
 
     #[Route(path: '/api/databases', methods: ['GET'])]
-    public function getDatabases(Request $request, DatabaseRepository $repository): JsonResponse {
+    public function getDatabases(Request $request): JsonResponse {
         $limit = 20;
         return new JsonResponse(
             $this->serializer->serialize(
                 [
-                    'items' => $repository->findBy(
+                    'items' => $this->repository->findBy(
                         [],
                         ['id' => 'DESC'],
                         $limit,
                         ($request->query->get('page', 1) - 1) * $limit,
                     ),
                     'limit' => $limit,
-                    'total' => $repository->count([]),
+                    'total' => $this->repository->count([]),
                 ],
                 JsonEncoder::FORMAT,
                 ['groups' => ['database']],
@@ -60,8 +61,8 @@ class DatabaseController extends AbstractController {
     }
 
     #[Route(path: '/api/databases/{database}', methods: ['DELETE'])]
-    public function deleteDatabase(Database $database, JobRepository $jobRepository): JsonResponse {
-        $busyJobsCount = $jobRepository->count(
+    public function deleteDatabase(Database $database): JsonResponse {
+        $busyJobsCount = $this->jobRepository->count(
             ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]],
         );
         if ($busyJobsCount > 0) {
@@ -82,7 +83,7 @@ class DatabaseController extends AbstractController {
     }
 
     #[Route(path: '/api/databases/{database}', name: 'app_api_put_database', methods: ['PUT'])]
-    public function putDatabase(Database $database, Request $request, JobRepository $jobRepository): JsonResponse {
+    public function putDatabase(Database $database, Request $request): JsonResponse {
         $resolver = new OptionsResolver();
         $resolver
             ->define('host')->required()->allowedTypes('string')
@@ -90,7 +91,7 @@ class DatabaseController extends AbstractController {
             ->define('password')->required()->allowedTypes('string')
             ->define('name')->required()->allowedTypes('string');
         $payload = $resolver->resolve(json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR));
-        $busyJobsCount = $jobRepository->count(
+        $busyJobsCount = $this->jobRepository->count(
             ['db' => $database, 'state' => [JobState::IN_QUEUE, JobState::IN_PROGRESS]],
         );
         if ($busyJobsCount > 0) {
